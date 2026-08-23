@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: page-agent-demo
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false

@@ -1,0 +1,10 @@
+services:
+  page-agent-demo:
+    build:
+      context: .
+    ports:
+      - "4178:4178"
+    environment:
+      - PORT=4178
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    restart: unless-stopped
