@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Lint: syntax-check all source .mjs (zero-dep, no install needed)
+      - name: Lint (syntax check)
+        run: |
+          fail=0
+          for f in serve.mjs build.mjs loader.js serve-static.mjs; do
+            node --check "$f" || { echo "SYNTAX FAIL: $f"; fail=1; }
+          done
+          exit $fail
+
+      # Build: requires the OpenRouter key to bake into dist/
+      - name: Build
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODEL: ${{ secrets.OPENROUTER_MODEL || 'openai/gpt-4o-mini' }}
+        run: npm run build
+
+      # Verify the build produced a deployable artifact with a key inlined
+      - name: Verify build output
+        run: |
+          test -f dist/index.html || { echo "dist/index.html missing"; exit 1; }
+          test -f dist/page-agent.demo.js || { echo "bundle missing"; exit 1; }
+          grep -q '"apiKey"' dist/index.html || { echo "apiKey not inlined"; exit 1; }
+          echo "build artifact OK"
