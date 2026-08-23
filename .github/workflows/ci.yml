@@ -24,10 +24,11 @@ jobs:
           done
           exit $fail
 
-      # Build: requires the OpenRouter key to bake into dist/
+      # Build: CI only validates the build pipeline, so use a placeholder key.
+      # Real deploys set OPENROUTER_API_KEY in the host dashboard, not here.
       - name: Build
         env:
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY || 'ci-placeholder-key-not-for-production' }}
           OPENROUTER_MODEL: ${{ secrets.OPENROUTER_MODEL || 'openai/gpt-4o-mini' }}
         run: npm run build
 
